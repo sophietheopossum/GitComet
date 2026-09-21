@@ -440,26 +440,7 @@ pub(super) fn apply_selected_diff_load_plan_state_with_reload_mode(
 fn diff_target_is_submodule(repo_state: &RepoState, target: &DiffTarget) -> bool {
     match target {
         DiffTarget::WorkingTree { path, area } => {
-            let Some(entry) = repo_state.status_entry_for_path(*area, path) else {
-                return false;
-            };
-            if entry.kind == FileStatusKind::Untracked {
-                return false;
-            }
-
-            if let Loadable::Ready(submodules) = &repo_state.submodules
-                && submodules.iter().any(|submodule| submodule.path == *path)
-            {
-                return true;
-            }
-
-            if entry.kind == FileStatusKind::Deleted {
-                return repo_state.head_gitlink_paths.contains(path);
-            }
-
-            let mut dot_git = repo_state.spec.workdir.join(path);
-            dot_git.push(".git");
-            std::fs::metadata(&dot_git).is_ok_and(|meta| meta.is_file() || meta.is_dir())
+            repo_state.working_tree_path_is_submodule(*area, path)
         }
         DiffTarget::Commit {
             commit_id,

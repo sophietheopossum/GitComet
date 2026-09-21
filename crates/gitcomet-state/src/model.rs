@@ -2290,6 +2290,33 @@ impl RepoState {
             .find(|entry| entry.path == path)
     }
 
+    /// Whether a working-tree path is a submodule, for callers that must warn
+    /// before acting on one. Prefers the loaded submodule list, falls back to
+    /// the recorded gitlinks for a deleted entry, and finally looks for a
+    /// nested `.git`, so it still answers when the list has not loaded.
+    pub fn working_tree_path_is_submodule(&self, area: DiffArea, path: &std::path::Path) -> bool {
+        let Some(entry) = self.status_entry_for_path(area, path) else {
+            return false;
+        };
+        if entry.kind == FileStatusKind::Untracked {
+            return false;
+        }
+
+        if let Loadable::Ready(submodules) = &self.submodules
+            && submodules.iter().any(|submodule| submodule.path == *path)
+        {
+            return true;
+        }
+
+        if entry.kind == FileStatusKind::Deleted {
+            return self.head_gitlink_paths.contains(path);
+        }
+
+        let mut dot_git = self.spec.workdir.join(path);
+        dot_git.push(".git");
+        std::fs::metadata(&dot_git).is_ok_and(|meta| meta.is_file() || meta.is_dir())
+    }
+
     pub fn worktree_status_cache_rev(&self) -> u64 {
         if self.worktree_status_rev != 0 || !matches!(self.worktree_status, Loadable::NotLoaded) {
             self.worktree_status_rev
@@ -2928,7 +2955,61 @@ impl<T> Loadable<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
     use std::time::SystemTime;
+
+    fn repo_with_unstaged(workdir: PathBuf, entries: Vec<FileStatus>) -> RepoState {
+        let mut repo = RepoState::new_opening(RepoId(1), RepoSpec { workdir });
+        repo.worktree_status = Loadable::Ready(Arc::new(entries));
+        repo
+    }
+
+    fn modified(path: &str) -> FileStatus {
+        FileStatus {
+            path: PathBuf::from(path),
+            kind: FileStatusKind::Modified,
+            conflict: None,
+        }
+    }
+
+    /// Discard treats a submodule row destructively, so the answer has to hold
+    /// even before the submodule list has loaded -- a nested `.git` is enough.
+    #[test]
+    fn a_nested_git_marks_a_path_as_a_submodule_without_the_loaded_list() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        std::fs::create_dir_all(dir.path().join("sub")).expect("create sub");
+        std::fs::write(dir.path().join("sub/.git"), "gitdir: ../.git/modules/sub")
+            .expect("write gitlink");
+
+        let repo = repo_with_unstaged(dir.path().to_path_buf(), vec![modified("sub")]);
+
+        assert!(matches!(repo.submodules, Loadable::NotLoaded));
+        assert!(repo.working_tree_path_is_submodule(DiffArea::Unstaged, Path::new("sub")));
+    }
+
+    #[test]
+    fn the_loaded_list_answers_without_touching_the_filesystem() {
+        let repo_dir = PathBuf::from("/nonexistent-for-this-test");
+        let mut repo = repo_with_unstaged(repo_dir, vec![modified("sub")]);
+        repo.submodules = Loadable::Ready(Arc::new(vec![Submodule {
+            path: PathBuf::from("sub"),
+            recorded_head: CommitId("a".into()),
+            checked_out_head: None,
+            status: SubmoduleStatus::UpToDate,
+        }]));
+
+        assert!(repo.working_tree_path_is_submodule(DiffArea::Unstaged, Path::new("sub")));
+    }
+
+    #[test]
+    fn an_ordinary_file_is_not_a_submodule() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        std::fs::write(dir.path().join("src.rs"), "fn main() {}").expect("write file");
+
+        let repo = repo_with_unstaged(dir.path().to_path_buf(), vec![modified("src.rs")]);
+
+        assert!(!repo.working_tree_path_is_submodule(DiffArea::Unstaged, Path::new("src.rs")));
+    }
 
     fn summary_with_live_halves(
         mode: gitcomet_core::domain::SubmoduleDiffSummaryMode,

@@ -62,26 +62,79 @@ pub(super) fn panel(
         }
     };
 
-    ConfirmDialog::new("Discard changes", DIALOG_420_WIDTH)
-        .text(
+    // Discarding a submodule row runs `git submodule update --checkout --force`,
+    // which resets the nested repository: say so, because "working tree changes"
+    // reads as "changes in this repository" and the loss is inside another one.
+    let submodule_count = {
+        let paths: Vec<std::path::PathBuf> = match path.as_ref() {
+            Some(clicked_path) => {
+                let pane = this.details_pane.read(cx);
+                let selection = pane
+                    .status_multi_selection
+                    .get(&repo_id)
+                    .map(|sel| sel.selected_paths_for_area(area))
+                    .unwrap_or(&[]);
+                if selection.len() > 1 && selection.iter().any(|p| p == clicked_path) {
+                    selection.to_vec()
+                } else {
+                    vec![clicked_path.clone()]
+                }
+            }
+            None => {
+                let pane = this.details_pane.read(cx);
+                pane.status_multi_selection
+                    .get(&repo_id)
+                    .map(|sel| sel.selected_paths_for_area(area).to_vec())
+                    .unwrap_or_default()
+            }
+        };
+        this.state
+            .repos
+            .iter()
+            .find(|repo| repo.id == repo_id)
+            .map(|repo| {
+                paths
+                    .iter()
+                    .filter(|p| repo.working_tree_path_is_submodule(area, p))
+                    .count()
+            })
+            .unwrap_or(0)
+    };
+
+    let dialog = ConfirmDialog::new("Discard changes", DIALOG_420_WIDTH).text(
+        theme,
+        format!("This will discard working tree changes for {detail}."),
+    );
+    let dialog = match submodule_count {
+        0 => dialog,
+        1 => dialog.note(
             theme,
-            format!("This will discard working tree changes for {detail}."),
-        )
-        .render(
+            "One of these is a submodule: it will be reset to the commit this \
+             repository records, discarding uncommitted work inside it.",
+        ),
+        n => dialog.note(
             theme,
-            dialog_cancel_button(
-                "discard_changes_cancel",
-                "discard_changes_cancel_hint",
-                theme,
-                cx,
+            format!(
+                "{n} of these are submodules: they will be reset to the commits \
+                 this repository records, discarding uncommitted work inside them."
             ),
-            components::Button::new("discard_changes_go", "Discard")
-                .style(components::ButtonStyle::Danger)
-                .disabled(!can_discard)
-                .on_click(theme, cx, move |this, _e, _w, cx| {
-                    this.discard_worktree_changes_confirmed(repo_id, area, path.clone(), cx);
-                    this.close_popover(cx);
-                }),
+        ),
+    };
+    dialog.render(
+        theme,
+        dialog_cancel_button(
+            "discard_changes_cancel",
+            "discard_changes_cancel_hint",
+            theme,
             cx,
-        )
+        ),
+        components::Button::new("discard_changes_go", "Discard")
+            .style(components::ButtonStyle::Danger)
+            .disabled(!can_discard)
+            .on_click(theme, cx, move |this, _e, _w, cx| {
+                this.discard_worktree_changes_confirmed(repo_id, area, path.clone(), cx);
+                this.close_popover(cx);
+            }),
+        cx,
+    )
 }
