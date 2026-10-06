@@ -1637,9 +1637,8 @@ async fn a_closed_repos_stashed_buffer_cannot_wedge_the_quit_dialog(cx: &mut gpu
             "the stashed edit is unsaved while its repo is still open"
         );
         view.update(app, |this, cx| {
-            let mut state = AppState::default();
-            state.active_repo = None;
-            push_test_state(this, Arc::new(state), cx);
+            // No repository is open any more.
+            push_test_state(this, Arc::new(AppState::default()), cx);
         });
     });
     cx.run_until_parked();
@@ -2002,7 +2001,7 @@ async fn unsaved_edits_are_reported_and_discardable_per_file(cx: &mut gpui::Test
 /// `syntax/live.rs`; this pins the rest of the path, which is where an offset or
 /// a dropped window would show up as "the colours are wrong in edit mode" while
 /// every engine test still passed.
-async fn assert_editor_renders_the_engines_highlights(
+fn assert_editor_renders_the_engines_highlights(
     cx: &mut gpui::TestAppContext,
     repo_id: gitcomet_state::model::RepoId,
     label: &str,
@@ -2098,8 +2097,7 @@ async fn the_editor_renders_rust_highlights_as_the_engine_produced_them(
             "    }\n",
             "}\n",
         ),
-    )
-    .await;
+    );
 }
 
 #[gpui::test]
@@ -2131,8 +2129,7 @@ async fn the_editor_renders_shell_highlights_as_the_engine_produced_them(
             "  greet \"$f\"\n",
             "done\n",
         ),
-    )
-    .await;
+    );
 }
 
 #[gpui::test]
@@ -2157,8 +2154,7 @@ async fn the_editor_renders_nunjucks_with_the_jinja_grammar(cx: &mut gpui::TestA
             "</nav>\n",
             "<script>\nconst open = false;\n</script>\n",
         ),
-    )
-    .await;
+    );
 }
 
 #[gpui::test]

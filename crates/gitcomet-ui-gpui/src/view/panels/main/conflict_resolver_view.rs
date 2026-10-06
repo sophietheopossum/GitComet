@@ -35,7 +35,9 @@ fn conflict_output_post_layout_scroll_y(gutter_y: Pixels, editor_max_y: Pixels) 
     gutter_y.clamp(-editor_max_y.max(px(0.0)), px(0.0))
 }
 
+// Kept next to the two helpers it tests.
 #[cfg(test)]
+#[allow(clippy::items_after_test_module)]
 mod wheel_tests {
     use super::*;
 

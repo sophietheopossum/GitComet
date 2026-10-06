@@ -3365,6 +3365,7 @@ pub(crate) struct MainPaneView {
     /// Test-only observation point immediately before a click worker updates
     /// its in-flight marker and installs or rejects its prepared document.
     #[cfg(test)]
+    #[allow(clippy::type_complexity)]
     pub(in crate::view) file_diff_click_syntax_before_complete_hook:
         Option<Arc<dyn Fn(&MainPaneView) + Send + Sync>>,
     /// Where each side's content lives when it is a file rather than text in

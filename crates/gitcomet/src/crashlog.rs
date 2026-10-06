@@ -916,7 +916,7 @@ fn read_pending_report_path(marker: &Path) -> std::io::Result<Option<PathBuf>> {
         let value = raw.trim();
         if let Some(hex) = value.strip_prefix(PENDING_REPORT_PATH_WIDE_PREFIX)
             && let Some(bytes) = hex_decode(hex)
-            && bytes.len() % 2 == 0
+            && bytes.len().is_multiple_of(2)
         {
             let mut wide = Vec::with_capacity(bytes.len() / 2);
             for chunk in bytes.as_chunks::<2>().0 {

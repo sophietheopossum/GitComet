@@ -64,7 +64,7 @@ pub fn path_from_storage_key(raw: &str) -> PathBuf {
 
         if let Some(hex) = raw.strip_prefix(SESSION_PATH_WIDE_PREFIX)
             && let Some(bytes) = hex_decode(hex)
-            && bytes.len() % 2 == 0
+            && bytes.len().is_multiple_of(2)
         {
             let mut wide = Vec::with_capacity(bytes.len() / 2);
             for chunk in bytes.as_chunks::<2>().0 {

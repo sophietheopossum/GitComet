@@ -3647,12 +3647,13 @@ mod injection_tests {
             )
             .expect("inline code must start highlighted");
             assert!(style.color.is_some());
-            let mut at = match location {
+            let start = match location {
                 "paragraph start" => 0,
                 "prose" => 2,
                 _ => code + 3,
             };
             for step in 0..20 {
+                let at = start + step;
                 text.insert(at, 'a');
                 document.sync(
                     Rope::from_str(&text),
@@ -3701,7 +3702,6 @@ mod injection_tests {
                 if location == "code" {
                     assert_eq!(styles_at(&highlights, at), Some(style));
                 }
-                at += 1;
             }
             let (version, tree, injections) =
                 live_syntax_reparse(document.background_reparse_request().unwrap()).unwrap();

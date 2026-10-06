@@ -17,6 +17,10 @@ const HISTORY_TAG_CHIP_PADDING_X_PX: f32 = 6.0;
 /// the badge keeps its proportion.
 const HISTORY_TAG_CHIP_COMFORTABLE_HEIGHT_PX: f32 = 24.0;
 const HISTORY_TAG_CHIP_COMFORTABLE_PADDING_X_PX: f32 = 8.0;
+const _: () = assert!(
+    HISTORY_TAG_CHIP_COMFORTABLE_PADDING_X_PX > HISTORY_TAG_CHIP_PADDING_X_PX,
+    "the padding has to follow the chip or the label crowds its edges"
+);
 const HISTORY_TAG_CHIP_GAP_PX: f32 = 4.0;
 const HISTORY_BRANCH_CHIP_ICON_PX: f32 = 11.0;
 const HISTORY_BRANCH_CHIP_COMBINED_ICON_PX: f32 = 16.0;
@@ -2011,10 +2015,6 @@ mod tests {
         };
 
         assert!(chip(comfortable) > chip(compact));
-        assert!(
-            HISTORY_TAG_CHIP_COMFORTABLE_PADDING_X_PX > HISTORY_TAG_CHIP_PADDING_X_PX,
-            "the padding has to follow the chip or the label crowds its edges"
-        );
 
         for metrics in UiDensity::ALL.into_iter().map(|density| Appearance {
             density,

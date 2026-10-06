@@ -462,7 +462,7 @@ mod tests {
             if row != 8 && row != 20 {
                 parents.push(row + 6);
             }
-            if row % 15 == 0 {
+            if row.is_multiple_of(15) {
                 parents.push(row + 7);
             }
             parents
@@ -483,8 +483,8 @@ mod tests {
                 );
                 walk = checkpoint.restore();
             }
-            let expected = original.step(row, &parents, parents.len() > 1, row % 11 == 0);
-            let actual = walk.step(row, &parents, parents.len() > 1, row % 11 == 0);
+            let expected = original.step(row, &parents, parents.len() > 1, row.is_multiple_of(11));
+            let actual = walk.step(row, &parents, parents.len() > 1, row.is_multiple_of(11));
             assert_eq!(actual, expected, "row={row}");
         }
     }
@@ -505,14 +505,14 @@ mod tests {
                 if row + width < count {
                     parents.push(row + width);
                 }
-                if row % 7 == 0 && row + 1 < count {
+                if row.is_multiple_of(7) && row + 1 < count {
                     parents.push(row + 1);
                 }
-                if row % 13 == 0 && row + 1 < count {
+                if row.is_multiple_of(13) && row + 1 < count {
                     parents.push(row + 1 + random as usize % (count - row - 1));
                 }
-                let head = row % 31 == 0;
-                if row % 1024 == 0 {
+                let head = row.is_multiple_of(31);
+                if row.is_multiple_of(1024) {
                     walk = walk.checkpoint().restore();
                     no_paint = no_paint.checkpoint().restore();
                 }

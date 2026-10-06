@@ -673,7 +673,7 @@ mod lookup_regressions {
                         random ^= random << 17;
                         chunk.copy_from_slice(&random.to_be_bytes()[..chunk.len()]);
                     }
-                    if row % 4 == 0 {
+                    if row.is_multiple_of(4) {
                         id[..8].fill(0xab);
                     }
                     id[hash_len - 4..].copy_from_slice(&(row as u32).to_be_bytes());
@@ -681,7 +681,7 @@ mod lookup_regressions {
                         .push(
                             &id,
                             ids.last().map(|id: &Vec<u8>| id.as_slice()),
-                            row % 9001 == 0,
+                            row.is_multiple_of(9001),
                         )
                         .unwrap();
                     ids.push(id);
@@ -733,7 +733,7 @@ mod lookup_regressions {
             }
             // Every fourth ID shares one prefix; externals borrow a prefix that is
             // in the index so a miss must survive the equal-prefix run search.
-            if row % 4 == 0 || (external && row % 2 == 0) {
+            if row.is_multiple_of(4) || (external && row.is_multiple_of(2)) {
                 id[..8].fill(0xab);
             }
             id[16..].copy_from_slice(&(row as u32).to_be_bytes());
@@ -807,9 +807,9 @@ mod lookup_regressions {
                 hidden_before[raw] + usize::from(hidden.binary_search(&(raw as u32)).is_ok());
         }
         let mut visible_rows = Vec::with_capacity(projection.len());
-        for raw in 0..count {
+        for (raw, &before) in hidden_before.iter().enumerate().take(count) {
             let is_hidden = hidden.binary_search(&(raw as u32)).is_ok();
-            let expected_visible = (!is_hidden).then_some(raw - hidden_before[raw]);
+            let expected_visible = (!is_hidden).then_some(raw - before);
             assert_eq!(
                 projection.visible_position(raw),
                 expected_visible,
@@ -817,7 +817,7 @@ mod lookup_regressions {
             );
             assert_eq!(
                 projection.visible_position_at_or_after(raw),
-                raw - hidden_before[raw],
+                raw - before,
                 "raw {raw}"
             );
             if !is_hidden {
@@ -871,7 +871,7 @@ mod lookup_regressions {
             if row + 1 < count {
                 parents.push(id(row + 1));
             }
-            if row % 40 == 0 && row + 97 < count {
+            if row.is_multiple_of(40) && row + 97 < count {
                 parents.push(id(row + 97));
             }
             builder
@@ -906,7 +906,7 @@ mod lookup_regressions {
                 .push(
                     &id,
                     parent.iter().map(|parent: &[u8; 20]| parent.as_slice()),
-                    row % 5_000 == 0,
+                    row.is_multiple_of(5_000),
                 )
                 .unwrap();
             ids.push(id);

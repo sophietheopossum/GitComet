@@ -4697,15 +4697,17 @@ fn try_auth_prompt_submit_passphrase_without_secret_shows_error(cx: &mut gpui::T
     let (view, cx) =
         cx.add_window_view(|window, cx| GitCometView::new(store, events, None, window, cx));
 
-    let mut state = AppState::default();
-    state.auth_prompt = Some(AuthPromptState {
-        kind: AuthPromptKind::Passphrase,
-        reason: "Enter passphrase".to_string(),
-        operation: AuthRetryOperation::Clone {
-            url: "git@example.com:repo.git".to_string(),
-            dest: PathBuf::from("/tmp/repo"),
-        },
-    });
+    let state = AppState {
+        auth_prompt: Some(AuthPromptState {
+            kind: AuthPromptKind::Passphrase,
+            reason: "Enter passphrase".to_string(),
+            operation: AuthRetryOperation::Clone {
+                url: "git@example.com:repo.git".to_string(),
+                dest: PathBuf::from("/tmp/repo"),
+            },
+        }),
+        ..AppState::default()
+    };
     let state = Arc::new(state);
 
     cx.update(|window, app| {
@@ -4733,15 +4735,17 @@ fn try_auth_prompt_submit_passphrase_dispatches_submit(cx: &mut gpui::TestAppCon
     let (view, cx) =
         cx.add_window_view(|window, cx| GitCometView::new(store, events, None, window, cx));
 
-    let mut state = AppState::default();
-    state.auth_prompt = Some(AuthPromptState {
-        kind: AuthPromptKind::Passphrase,
-        reason: "Enter passphrase".to_string(),
-        operation: AuthRetryOperation::Clone {
-            url: "git@example.com:repo.git".to_string(),
-            dest: PathBuf::from("/tmp/repo"),
-        },
-    });
+    let state = AppState {
+        auth_prompt: Some(AuthPromptState {
+            kind: AuthPromptKind::Passphrase,
+            reason: "Enter passphrase".to_string(),
+            operation: AuthRetryOperation::Clone {
+                url: "git@example.com:repo.git".to_string(),
+                dest: PathBuf::from("/tmp/repo"),
+            },
+        }),
+        ..AppState::default()
+    };
     let state = Arc::new(state);
 
     cx.update(|window, app| {
@@ -4770,15 +4774,17 @@ fn try_auth_prompt_submit_username_password_empty_username_shows_error(
     let (view, cx) =
         cx.add_window_view(|window, cx| GitCometView::new(store, events, None, window, cx));
 
-    let mut state = AppState::default();
-    state.auth_prompt = Some(AuthPromptState {
-        kind: AuthPromptKind::UsernamePassword,
-        reason: "auth required".to_string(),
-        operation: AuthRetryOperation::Clone {
-            url: "https://example.com/repo.git".to_string(),
-            dest: PathBuf::from("/tmp/repo"),
-        },
-    });
+    let state = AppState {
+        auth_prompt: Some(AuthPromptState {
+            kind: AuthPromptKind::UsernamePassword,
+            reason: "auth required".to_string(),
+            operation: AuthRetryOperation::Clone {
+                url: "https://example.com/repo.git".to_string(),
+                dest: PathBuf::from("/tmp/repo"),
+            },
+        }),
+        ..AppState::default()
+    };
     let state = Arc::new(state);
 
     cx.update(|window, app| {
@@ -4808,15 +4814,17 @@ fn try_auth_prompt_submit_username_password_dispatches_submit(cx: &mut gpui::Tes
     let (view, cx) =
         cx.add_window_view(|window, cx| GitCometView::new(store, events, None, window, cx));
 
-    let mut state = AppState::default();
-    state.auth_prompt = Some(AuthPromptState {
-        kind: AuthPromptKind::UsernamePassword,
-        reason: "auth required".to_string(),
-        operation: AuthRetryOperation::Clone {
-            url: "https://example.com/repo.git".to_string(),
-            dest: PathBuf::from("/tmp/repo"),
-        },
-    });
+    let state = AppState {
+        auth_prompt: Some(AuthPromptState {
+            kind: AuthPromptKind::UsernamePassword,
+            reason: "auth required".to_string(),
+            operation: AuthRetryOperation::Clone {
+                url: "https://example.com/repo.git".to_string(),
+                dest: PathBuf::from("/tmp/repo"),
+            },
+        }),
+        ..AppState::default()
+    };
     let state = Arc::new(state);
 
     cx.update(|window, app| {

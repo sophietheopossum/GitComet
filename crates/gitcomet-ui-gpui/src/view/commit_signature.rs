@@ -110,7 +110,9 @@ mod tests {
         }
     }
 
+    // Table-driven like the failed-status test below.
     #[test]
+    #[allow(clippy::single_element_loop)]
     fn verified_statuses_use_the_shield_check_and_the_info_palette() {
         let theme = AppTheme::gitcomet_dark();
         for status in [SignatureStatus::Good] {

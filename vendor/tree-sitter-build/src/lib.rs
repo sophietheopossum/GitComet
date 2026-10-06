@@ -11,6 +11,9 @@
 //! Everything it needs it reads from the environment cargo sets for the *calling*
 //! crate's build script, so there is nothing to pass and nothing to keep in sync.
 
+// The example above is a whole build.rs, so its `fn main` is the point.
+#![allow(clippy::needless_doctest_main)]
+
 use std::path::{Path, PathBuf};
 
 /// The directory of the crate whose build script is running.

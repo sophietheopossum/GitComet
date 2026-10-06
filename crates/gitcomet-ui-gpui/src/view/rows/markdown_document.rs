@@ -1026,6 +1026,26 @@ fn scrolling_block(
         .into_any_element()
 }
 
+fn render_image(
+    row_ix: usize,
+    row: &MarkdownPreviewRow,
+    context: &MarkdownDocumentContext,
+) -> AnyElement {
+    crate::view::rows::markdown_preview_flow_image(
+        row,
+        row_ix,
+        context.theme,
+        context.ui_scale_percent,
+        context.image_base_dir.as_deref(),
+        &context.picture_sizes,
+        &context.remote_image_access,
+    )
+}
+
+fn scaled(value: f32, context: &MarkdownDocumentContext) -> Pixels {
+    context.theme.markdown_px(value, context.ui_scale_percent)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1048,24 +1068,4 @@ mod tests {
             "Amber's accent-backed selection color must not tint fenced code blocks"
         );
     }
-}
-
-fn render_image(
-    row_ix: usize,
-    row: &MarkdownPreviewRow,
-    context: &MarkdownDocumentContext,
-) -> AnyElement {
-    crate::view::rows::markdown_preview_flow_image(
-        row,
-        row_ix,
-        context.theme,
-        context.ui_scale_percent,
-        context.image_base_dir.as_deref(),
-        &context.picture_sizes,
-        &context.remote_image_access,
-    )
-}
-
-fn scaled(value: f32, context: &MarkdownDocumentContext) -> Pixels {
-    context.theme.markdown_px(value, context.ui_scale_percent)
 }

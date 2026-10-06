@@ -2352,6 +2352,8 @@ mod tests {
     }
 
     #[test]
+    // Spelled out as 32 + button and 32 + 1 + cell, the X10 encoding.
+    #[allow(clippy::identity_op)]
     fn normal_mouse_button_press_report() {
         let mode = TerminalModes::MOUSE_REPORT_CLICK;
         let report = terminal_mouse_button_report(
@@ -2370,6 +2372,8 @@ mod tests {
     }
 
     #[test]
+    // Spelled out as 32 + button and 32 + 1 + cell, the X10 encoding.
+    #[allow(clippy::identity_op)]
     fn normal_mouse_button_release_report() {
         let mode = TerminalModes::MOUSE_REPORT_CLICK;
         let report = terminal_mouse_button_report(
