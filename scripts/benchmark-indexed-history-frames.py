@@ -48,7 +48,7 @@ for width, pixels, scale in cases:
             total = re.search(r'publication \+ draw .* p50_ms=([\d.]+) p95_ms=([\d.]+) p99_ms=([\d.]+) paths_max=(\d+)', result.stdout)
             if not draw or not total:
                 raise RuntimeError('Missing production frame benchmark output')
-            sample = dict(zip(['draw_p50_ms', 'draw_p95_ms', 'draw_p99_ms', 'allocations_per_frame', 'bytes_per_frame'], map(float, draw.groups())))
+            sample: 'dict[str, float | None]' = dict(zip(['draw_p50_ms', 'draw_p95_ms', 'draw_p99_ms', 'allocations_per_frame', 'bytes_per_frame'], map(float, draw.groups())))
             sample.update(dict(zip(['total_p50_ms', 'total_p95_ms', 'total_p99_ms'], map(float, total.groups()[:3]))))
             # Original production code has no path instrumentation.
             sample['emitted_paths_max'] = int(total[4]) if phase == 'after' else None
